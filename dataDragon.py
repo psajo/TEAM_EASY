@@ -6,7 +6,7 @@ import time
 # APIKEY파일에서 읽기
 def setApikey():
     global api_keys, api_key
-    with open('C:/Users/psajo/Desktop/apikey.txt', 'r') as f:
+    with open('C:/Users/kccistc/Desktop/apikey.txt', 'r') as f:
         api_keys = f.read().split()
     print('api_key리스트 : ', api_keys)
     api_key = api_keys[api_index]
@@ -95,11 +95,11 @@ api_keys = []
 TIER_LIST = ['CHALLENGER', 'GRANDMASTER', 'MASTER', 'DIAMOND', 'PLATINUM', 'GOLD', 'SILVER', 'BRONZE',
              'IRON']  # 티어이름 내림차순
 DIVISION_LIST = ['I', 'II', 'III', 'IV']
-HOST = '20.194.19.37';
+HOST = '127.0.0.1';
 PORT = 3306;
-USER = 'te';
+USER = 'root';
 PASSWD = '1234';
-DB = 'teameasy';
+DB = 'team_easy';
 CHARSET = 'utf8'
 conn = None
 cur = None
