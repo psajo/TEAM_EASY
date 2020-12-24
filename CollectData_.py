@@ -9,9 +9,9 @@ class CollectData :
     TIER_LIST = ['CHALLENGER', 'GRANDMASTER', 'MASTER', 'DIAMOND', 'PLATINUM', 'GOLD', 'SILVER', 'BRONZE',
                  'IRON']  # 티어이름 내림차순
     DIVISION_LIST = ['I', 'II', 'III', 'IV']
-    HOST = '20.194.19.37';
+    HOST = 'localhost';
     PORT = 3306;
-    USER = 'te';
+    USER = 'root';
     PASSWD = '1234';
     DB = 'teameasy';
     CHARSET = 'utf8'
