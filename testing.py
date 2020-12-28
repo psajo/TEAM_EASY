@@ -1,8 +1,10 @@
-import requests
-
-url = 'http://ddragon.leagueoflegends.com/cdn/10.25.1/data/ko_KR/champion.json'
-response =requests.get(url)
-result =response.json()
-data = result['data']
-for value in data :
-    print(data[value]['name'])
+list1 = [1,2,3,4,5]
+for i,v in enumerate(list1) :
+    if i ==3 :
+        i-=1
+    print(i,v)
+a1 =1
+for i in range(1,6,a1) :
+    if i == 3 :
+        a1=-1
+    print(i)

@@ -1,101 +1,68 @@
-import mydao
-import collectData
 import requests
+import pymysql
 import time
 
-'''
-CREATE TABLE IF NOT EXISTS `leagueEntryDTO` (
-  `leagueId` VARCHAR(100) NULL,
-  `summonerId` VARCHAR(100) NULL,
-  `summonerName` VARCHAR(50) NOT NULL,
-  `queueType` VARCHAR(50) NULL,
-  `tier` VARCHAR(50) NULL,
-  `rank` VARCHAR(5) NULL,
-  `leaguePoints` INT NULL,
-  `wins` INT NULL,
-  `losses` INT NULL,
-  `hotStreak` TINYINT NULL,
-  `veteran` TINYINT NULL,
-  `freshBlood` TINYINT NULL,
-  `inactive` TINYINT NULL,
-  `miniSeries` JSON NULL,
-  PRIMARY KEY (`summonerName`))
-ENGINE = InnoDB
-'''
-class LeagueEntryDto(mydao.MyDAO,collectData.CollectData) :
-    #leagueEntryDTO 테이블 생성
-    def createLeagueEntryDtoTable(self):
-        self.connectDB()
-        sql =   '''
-                CREATE TABLE IF NOT EXISTS `leagueEntryDTO` (
-                  `leagueId` VARCHAR(100) NULL,
-                  `summonerId` VARCHAR(100) NULL,
-                  `summonerName` VARCHAR(50) NOT NULL,
-                  `queueType` VARCHAR(50) NULL,
-                  `tier` VARCHAR(50) NULL,
-                  `rank` VARCHAR(5) NULL,
-                  `leaguePoints` INT NULL,
-                  `wins` INT NULL,
-                  `losses` INT NULL,
-                  `hotStreak` TINYINT NULL,
-                  `veteran` TINYINT NULL,
-                  `freshBlood` TINYINT NULL,
-                  `inactive` TINYINT NULL,
-                  `miniSeries` JSON NULL,
-                  PRIMARY KEY (`summonerName`))
-                ENGINE = InnoDB
-                '''
-        self.cur.execute(sql)
-        print('create leagueEntryDTO table.')
-        self.closeDB()
+#APIKEY파일에서 읽기
+def setApikey() :
+    global api_keys, api_key
+    with open('C:/Users/psajo/Desktop/apikey.txt', 'r') as f:
+        api_keys = f.read().split()
+    print('api_key리스트 : ',api_keys)
+    api_key = api_keys[api_index]
 
-    #api에서 데이터를 받아 반환
-    def getJsonFromApi(self,queue,tier,division,page):
-        path='C:/Users/psajo/Desktop/apikey.txt'
-        self.setApikeyFromFile(path)
-        uri = f'https://kr.api.riotgames.com/lol/league-exp/v4/entries/{queue}/{tier}/{division}?page={page}&api_key={self.api_key}'
-        print(uri)
-        response = requests.get(uri)
-        status_code = response.status_code
-        data = response.json()
-        return status_code,data
+#APIKEY 바꾸기
+def changeApikey(key="") :
+    global api_index,api_key
+    if key !="" : #입력값이 있으면
+        api_key = key
+    else : #입력값이 없으면
+        max_index = len(api_keys)
+        api_index = api_index+1
+        if api_index > max_index-1 : #index넘어갔을때
+            api_index=0
+        api_key = api_keys[api_index]
 
-    #api를 이용하여 받은 데이터들을 insert 반복
-    def insertLeagueEntriesByApi(self):
-        queue = 'RANKED_SOLO_5x5'
-        try :
-            ###
-            for tier in self.TIER_LIST:
-                for division in self.DIVISION_LIST:
-                    page = 1
-                    while True:
-                        status_code, data = self.getJsonFromApi(queue, tier, division, page)
-                        if status_code == 200:  # 데이터 받는데 성공
-                            page += 1
-                            #샘플로 1페이지씩만 받는다
-                            if page >=2 :
-                                break
-                            #나중에 여기까지 지울 것
-                        elif status_code == 429:  # 이용제한 걸림
-                            self.changeApikey()
-                        elif status_code == 403:  # apikey 만료
-                            assert True, status_code + ',apikey 만료'
-                        else:
-                            time.sleep(0.1)
-        except :
-            pass
+#conn, cur 얻기
+def setConnCur() :
+    global conn, cur
+    conn = pymysql.connect(host=HOST,port=PORT,user=USER,passwd=PASSWD,db=DB,charset=CHARSET)
+    cur = conn.cursor()
+
+#conn, cur 닫기
+def closeConnCur() :
+    conn.commit()
+    cur.close()
+    conn.close()
 
 
-        queue = 'RANKED_SOLO_5x5'
-        for tier in self.TIER_LIST :
-            for division in self.DIVISION_LIST :
-                page =1
-                while True :
+#데이터베이스에 LeagueEntry테이블 만들기
+def createLeagueEntryTable() :
+    # 데이터베이스 연결
+    setConnCur()
+    sql = 'CREATE TABLE IF NOT EXISTS leagueEntryDto ( \
+    	leagueId CHAR(36), \
+        summonerId VARCHAR(100), \
+        summonerName VARCHAR(100), \
+        queueType VARCHAR(20), \
+        tier VARCHAR(20), \
+        rank VARCHAR(3), \
+        leaguePoints INT, \
+        wins INT, \
+        losses INT, \
+        hotStreak BOOLEAN, \
+        veteran BOOLEAN, \
+        freshBlood BOOLEAN, \
+        inactive BOOLEAN, \
+        miniSeries VARCHAR(200) ,\
+        apikey VARCHAR(50),\
+        PRIMARY KEY(summonerName)\
+    )'
+    cur.execute(sql)
+    conn.commit()
+    print('create leagueEntry table.')
+    closeConnCur()
+#createLeagueEntryTable end
 
-                    page+=1
-
-
-        return data
 
 #leagueEntry테이블에 값 넣기
 def insertLeagueEntry(response):
