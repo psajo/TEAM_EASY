@@ -32,7 +32,7 @@ class MyDAO:
     #dictionary, list를 문자열로, bool을 tinyint로
     def transformForDB(self,val):
         if type(val) == list:
-            return ','.join(val)
+            return str(val).replace('\'', '\"')
         elif type(val) == dict:
             return str(val).replace('\'', '\"')
         elif type(val) == bool:

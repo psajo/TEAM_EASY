@@ -18,12 +18,6 @@ CREATE TABLE IF NOT EXISTS `mydb`.`championDTO` (
 ENGINE = InnoDB
 '''
 class DataDragon(mydao.MyDAO) :
-    #uri setter, getter
-    def setUri(self,uri):
-        self.uri = uri
-    def getUri(self):
-        return self.uri
-
     #테이블 생성
     def createTable(self):
         self.connectDB()
@@ -54,7 +48,7 @@ class DataDragon(mydao.MyDAO) :
         return data
 
     #json데이터를 테이블에 저장한다
-    def insertJson(self,jdata):
+    def insertChampionDtos(self,jdata):
         self.connectDB()
         for champ in jdata:
             keys = jdata[champ].keys()
@@ -91,7 +85,7 @@ if __name__ == '__main__':
     dd.createTable()
     dd.printCount()
     try :
-        dd.insertJson(dd.getJsonFromUri())
-    except:
-        pass
+        dd.insertChampionDtos(dd.getJsonFromUri())
+    except Exception as e:
+        print(e)
     dd.printCount()
