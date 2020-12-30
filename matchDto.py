@@ -28,18 +28,18 @@ class MatchDto(mydao.MyDAO,collectData.CollectData) :
         sql =   '''
                 CREATE TABLE IF NOT EXISTS `team_easy`.`matchDto` (
                   `gameId` BIGINT NOT NULL,
-                  `participantIdentities` JSON NULL,
+                  `participantIdentities` MEDIUMTEXT NULL,
                   `queueId` INT NULL,
                   `gameType` VARCHAR(20) NULL,
                   `gameDuration` BIGINT NULL,
-                  `teams` JSON NULL,
+                  `teams` MEDIUMTEXT NULL,
                   `platformId` VARCHAR(10) NULL,
                   `gameCreation` BIGINT NULL,
                   `seasonId` INT NULL,
                   `gameVersion` VARCHAR(20) NULL,
                   `mapId` INT NULL,
                   `gameMode` VARCHAR(20) NULL,
-                  `participants` JSON NULL,
+                  `participants` MEDIUMTEXT NULL,
                   PRIMARY KEY (`gameId`))
                 ENGINE = InnoDB
                 '''
@@ -59,8 +59,9 @@ class MatchDto(mydao.MyDAO,collectData.CollectData) :
 
     #gameId로 MatchDto를 받아온다
     def getMatchDtoFromApi(self,gameId):
-        path = 'C:/Users/kccistc/Desktop/apikey.txt'
-        self.setApikeyFromFile(path)
+        # path = 'apikey.txt'
+        # self.setApikeyFromFile(path)
+        self.setApikeyFromFile()
         uri = f'https://kr.api.riotgames.com/lol/match/v4/matches/{gameId}?api_key={self.api_key}'
         print(uri)
         response = requests.get(uri)
@@ -109,7 +110,7 @@ class MatchDto(mydao.MyDAO,collectData.CollectData) :
         print(values)
         self.cur.execute(sql,values)
         self.conn.commit()
-        print(dto['gameId'], dto['champion'])
+        print(dto['gameId'],dto['participantIdentities'][0]['player']['summonerName'] ,dto['participants'][0]['participantId'], dto['participants'][0]['championId'])
         self.closeDB()
 
 if __name__ == '__main__':

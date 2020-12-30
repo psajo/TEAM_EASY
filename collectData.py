@@ -9,7 +9,7 @@ class CollectData :
 
     # APIKEY파일에서 읽기
     #path='C:/Users/psajo/Desktop/apikey.txt'
-    def setApikeyFromFile(self,path):
+    def setApikeyFromFile(self,path='apikey.txt'):
         with open(path, 'r') as f:
             self.api_keys = f.read().split()
         print('api_key리스트 : ', self.api_keys)

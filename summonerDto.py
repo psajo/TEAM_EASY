@@ -58,8 +58,9 @@ class SummonerDto(mydao.MyDAO,collectData.CollectData) :
 
     #summonerDto 테이블을 채운다. api에서 데이터를 받아 insert를 여러번 반복
     def insertSummonerDtos(self):
-        path='C:/Users/kccistc/Desktop/apikey.txt'
-        self.setApikeyFromFile(path)
+        # path='apikey.txt'
+        # self.setApikeyFromFile(path)
+        self.setApikeyFromFile()
         start_num =0
         amount=20
         while True :

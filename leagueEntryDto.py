@@ -52,8 +52,9 @@ class LeagueEntryDto(mydao.MyDAO,collectData.CollectData) :
 
     #api에서 데이터를 받아 반환
     def getJsonFromApi(self,queue,tier,division,page):
-        path='C:/Users/kccistc/Desktop/apikey.txt'
-        self.setApikeyFromFile(path)
+        # path='apikey.txt'
+        # self.setApikeyFromFile(path)
+        self.setApikeyFromFile()
         uri = f'https://kr.api.riotgames.com/lol/league-exp/v4/entries/{queue}/{tier}/{division}?page={page}&api_key={self.api_key}'
         print(uri)
         response = requests.get(uri)
