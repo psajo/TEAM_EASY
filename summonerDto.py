@@ -56,6 +56,7 @@ class SummonerDto(mydao.MyDAO,collectData.CollectData) :
         data = response.json()
         return status_code, data
 
+
     #summonerDto 테이블을 채운다. api에서 데이터를 받아 insert를 여러번 반복
     def insertSummonerDtos(self):
         # path='apikey.txt'

@@ -100,7 +100,6 @@ class MatchDto(mydao.MyDAO,collectData.CollectData) :
         for i, v in enumerate(values):
             values[i] = self.transformForDB(v)
         p_list = ['%s' for _ in range(len(values))]
-
         sql = 'REPLACE INTO matchDto('
         sql += ','.join(keys)
         sql += ') VALUES('

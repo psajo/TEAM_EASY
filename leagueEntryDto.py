@@ -125,8 +125,6 @@ class LeagueEntryDto(mydao.MyDAO,collectData.CollectData) :
         self.conn.commit()
         self.closeDB()
 
-
-
 if __name__ == '__main__':
     leagueEntry = LeagueEntryDto()
     leagueEntry.createLeagueEntryDtoTable()

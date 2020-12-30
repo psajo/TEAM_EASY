@@ -29,6 +29,7 @@ class MyDAO:
         self.cur.close()
         self.conn.close()
 
+
     #dictionary, list를 문자열로, bool을 tinyint로
     def transformForDB(self,val):
         if type(val) == list:

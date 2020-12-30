@@ -80,6 +80,7 @@ class DataDragon(mydao.MyDAO) :
         print(rows)
         self.closeDB()
 
+
 if __name__ == '__main__':
     dd=DataDragon()
     dd.createTable()

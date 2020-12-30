@@ -83,6 +83,7 @@ class MatchReferenceDto(mydao.MyDAO,collectData.CollectData) :
                 row_index+=1
             start_num += amount
 
+
     #하나의 matchReferenceDto를 insert한다
     def insertMatchReferenceDto(self,dto):
         self.connectDB()

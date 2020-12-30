@@ -15,6 +15,7 @@ class CollectData :
         print('api_key리스트 : ', self.api_keys)
         self.api_key = self.api_keys[self.api_index]
 
+
     # APIKEY 바꾸기
     def changeApikey(self,key=""):
         if key != "":  # 입력값이 있으면
