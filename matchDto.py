@@ -59,6 +59,8 @@ class MatchDto(mydao.MyDAO,collectData.CollectData) :
 
     #gameId로 MatchDto를 받아온다
     def getMatchDtoFromApi(self,gameId):
+        path = 'C:/Users/kccistc/Desktop/apikey.txt'
+        self.setApikeyFromFile(path)
         uri = f'https://kr.api.riotgames.com/lol/match/v4/matches/{gameId}?api_key={self.api_key}'
         print(uri)
         response = requests.get(uri)
@@ -104,6 +106,7 @@ class MatchDto(mydao.MyDAO,collectData.CollectData) :
         sql += ','.join(p_list)
         sql += ')'
         print(sql)
+        print(values)
         self.cur.execute(sql,values)
         self.conn.commit()
         print(dto['gameId'], dto['champion'])
