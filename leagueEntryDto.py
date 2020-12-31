@@ -97,10 +97,10 @@ class LeagueEntryDto(mydao.MyDAO,collectData.CollectData) :
                         else:
                             time.sleep(0.1)
                         page += 1
-                        # 샘플로 1페이지씩만 받는다 여기부터
-                        if page >= 2:
-                            break
-                        # 나중에 여기까지 지울 것
+                        # # 샘플로 1페이지씩만 받는다 여기부터
+                        # if page >= 2:
+                        #     break
+                        # # 나중에 여기까지 지울 것
         except Exception as e: #apikey가 만료 되었을때 그만하기를 눌렀을 경우 여기로 온다
             print("예외 발생. ",e)
 
@@ -131,4 +131,4 @@ if __name__ == '__main__':
     start_time = time.time()
     leagueEntry.insertLeagueEntriesByApi()
     end_time = time.time()
-    print('수행 시간 : %.2f초'%(end_time-start_time))
+    print('총 수행 시간 : %.2f초'%(end_time-start_time))

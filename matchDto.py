@@ -118,7 +118,7 @@ if __name__ == '__main__':
     start_time = time.time()
     matchDto.insertMatchDtos()
     end_time = time.time()
-    print('총 수행 시간 : %.2f'%(end_time-start_time))
+    print('총 수행 시간 : %.2f초'%(end_time-start_time))
 
 
 
