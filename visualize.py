@@ -11,7 +11,7 @@ import matplotlib.font_manager as fm
 class MyVisualize(mydao.MyDAO) :
     def getLeagueEntrys(self):
         self.connectDB()
-        sql = "SELECT summonerName, char_length(replace(summonerName, ' ','')), tier FROM leagueEntryDto"
+        sql = "SELECT summonerName, char_length(replace(summonerName, ' ','')), tier FROM leagueEntryDto WHERE rank='I'"
         self.cur.execute(sql)
         rows =self.cur.fetchall()
         self.closeDB()

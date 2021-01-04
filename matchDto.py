@@ -6,7 +6,7 @@ import time
 #데이터베이스 접근 mydao.MyDAO // api키 관리 collectData.CollectData
 class MatchDto(mydao.MyDAO,collectData.CollectData) :
     #MatchDto 테이블 생성
-    def createMatchDtoTable(self):
+    def createTables(self):
         self.connectDB()
         sql =   '''
                 CREATE TABLE IF NOT EXISTS `team_easy`.`matchDto` (
@@ -27,25 +27,24 @@ class MatchDto(mydao.MyDAO,collectData.CollectData) :
         self.conn.commit()
         print('create matchDto table.')
         sql = '''
-            CREATE TABLE IF NOT EXISTS `team_easy`.`playerDto` (
-              `gameId` BIGINT NOT NULL,
-              `participantId` INT NOT NULL,
-              `profileIcon` INT NULL,
-              `accountId` VARCHAR(100) NULL,
-              `matchHistoryUri` VARCHAR(100) NULL,
-              `currentAccountId` VARCHAR(100) NULL,
-              `currentPlatformId` VARCHAR(10) NULL,
-              `summonerName` VARCHAR(50) NULL,
-              `summonerId` VARCHAR(100) NULL,
-              `platformId` VARCHAR(10) NULL,
-              INDEX `fk_playerDto_matchDto_idx` (`gameId` ASC) VISIBLE,
-              PRIMARY KEY (`gameId`, `participantId`),
-              CONSTRAINT `fk_playerDto_matchDto`
-                FOREIGN KEY (`gameId`)
-                REFERENCES `team_easy`.`matchDto` (`gameId`)
-                ON DELETE CASCADE
-                ON UPDATE CASCADE)
-            ENGINE = InnoDB
+                CREATE TABLE IF NOT EXISTS `team_easy`.`playerDto` (
+                  `gameId` BIGINT NOT NULL,
+                  `participantId` INT NOT NULL,
+                  `profileIcon` INT NULL,
+                  `accountId` VARCHAR(100) NULL,
+                  `matchHistoryUri` VARCHAR(100) NULL,
+                  `currentAccountId` VARCHAR(100) NULL,
+                  `currentPlatformId` VARCHAR(10) NULL,
+                  `summonerName` VARCHAR(50) NULL,
+                  `summonerId` VARCHAR(100) NULL,
+                  `platformId` VARCHAR(10) NULL,
+                  PRIMARY KEY (`gameId`, `participantId`),
+                  CONSTRAINT `fk_playerDto_matchDto`
+                    FOREIGN KEY (`gameId`)
+                    REFERENCES `team_easy`.`matchDto` (`gameId`)
+                    ON DELETE CASCADE
+                    ON UPDATE CASCADE)
+                ENGINE = InnoDB
         '''
         self.cur.execute(sql)
         self.conn.commit()
@@ -57,6 +56,7 @@ class MatchDto(mydao.MyDAO,collectData.CollectData) :
                   `towerKills` INT NULL,
                   `riftHeraldKills` INT NULL,
                   `firstBlood` TINYINT NULL,
+                  `inhibitorKills` INT NULL,
                   `bans` VARCHAR(200) NULL,
                   `firstBaron` TINYINT NULL,
                   `firstDragon` TINYINT NULL,
@@ -68,7 +68,6 @@ class MatchDto(mydao.MyDAO,collectData.CollectData) :
                   `vilemawKills` INT NULL,
                   `firstRiftHerald` TINYINT NULL,
                   `win` VARCHAR(10) NULL,
-                  INDEX `fk_teamStatsDto_matchDto1_idx` (`gameId` ASC) VISIBLE,
                   PRIMARY KEY (`gameId`, `teamId`),
                   CONSTRAINT `fk_teamStatsDto_matchDto1`
                     FOREIGN KEY (`gameId`)
@@ -76,30 +75,29 @@ class MatchDto(mydao.MyDAO,collectData.CollectData) :
                     ON DELETE CASCADE
                     ON UPDATE CASCADE)
                 ENGINE = InnoDB
-                '''
+        '''
         self.cur.execute(sql)
         self.conn.commit()
         print('create teamStatsDto table.')
         sql = '''
-                        CREATE TABLE IF NOT EXISTS `team_easy`.`participantDto` (
-                          `gameId` BIGINT NOT NULL,
-                          `participantId` INT NOT NULL,
-                          `championId` INT NULL,
-                          `runes` MEDIUMTEXT NULL,
-                          `teamId` INT NULL,
-                          `spell1Id` INT NULL,
-                          `spell2Id` INT NULL,
-                          `highestAchievedSeasonTier` VARCHAR(20) NULL,
-                          `masteries` MEDIUMTEXT NULL,
-                          INDEX `fk_participantDto_matchDto1_idx` (`gameId` ASC) VISIBLE,
-                          PRIMARY KEY (`gameId`, `participantId`),
-                          CONSTRAINT `fk_participantDto_matchDto1`
-                            FOREIGN KEY (`gameId`)
-                            REFERENCES `team_easy`.`matchDto` (`gameId`)
-                            ON DELETE CASCADE
-                            ON UPDATE CASCADE)
-                        ENGINE = InnoDB
-                        '''
+                CREATE TABLE IF NOT EXISTS `team_easy`.`participantDto` (
+                  `gameId` BIGINT NOT NULL,
+                  `participantId` INT NOT NULL,
+                  `championId` INT NULL,
+                  `runes` MEDIUMTEXT NULL,
+                  `teamId` INT NULL,
+                  `spell1Id` INT NULL,
+                  `spell2Id` INT NULL,
+                  `highestAchievedSeasonTier` VARCHAR(20) NULL,
+                  `masteries` MEDIUMTEXT NULL,
+                  PRIMARY KEY (`gameId`, `participantId`),
+                  CONSTRAINT `fk_participantDto_matchDto1`
+                    FOREIGN KEY (`gameId`)
+                    REFERENCES `team_easy`.`matchDto` (`gameId`)
+                    ON DELETE CASCADE
+                    ON UPDATE CASCADE)
+                ENGINE = InnoDB
+        '''
         self.cur.execute(sql)
         self.conn.commit()
         print('create participantDto table.')
@@ -151,7 +149,6 @@ class MatchDto(mydao.MyDAO,collectData.CollectData) :
                   `combatPlayerScore` INT NULL,
                   `inhibitorKills` INT NULL,
                   `turretKills` INT NULL,
-                  `participantId` INT NULL,
                   `trueDamageTaken` BIGINT NULL,
                   `firstBloodAssist` TINYINT NULL,
                   `nodeCaptureAssist` INT NULL,
@@ -268,7 +265,6 @@ class MatchDto(mydao.MyDAO,collectData.CollectData) :
     def getMatchDtoFromApi(self,gameId):
         # path = 'apikey.txt'
         # self.setApikeyFromFile(path)
-        self.setApikeyFromFile()
         uri = f'https://kr.api.riotgames.com/lol/match/v4/matches/{gameId}?api_key={self.api_key}'
         print(uri)
         response = requests.get(uri)
@@ -278,6 +274,7 @@ class MatchDto(mydao.MyDAO,collectData.CollectData) :
 
     #matchReferenceDto 테이블을 채운다. api에서 받은 데이터를 insert를 반복하여 채움
     def insertMatchDtos(self):
+        self.setApikeyFromFile()
         start_num =0
         amount=1000
         while True :
@@ -302,30 +299,123 @@ class MatchDto(mydao.MyDAO,collectData.CollectData) :
     def insertMatchDto(self,dto):
         self.connectDB()
         print('type : ', type(dto), ' data : ', dto)
+        gameId = dto['gameId']
+        teams = dto.pop('teams')
+        participants = dto.pop('participants')
+        participantIdentities = dto.pop('participantIdentities')
         keys = list(dto.keys())
         values = list(dto.values())
-        for i, v in enumerate(values):
-            values[i] = self.transformForDB(v)
-        p_list = ['%s' for _ in range(len(values))]
-        sql = 'REPLACE INTO matchDto('
-        sql += ','.join(keys)
-        sql += ') VALUES('
-        sql += ','.join(p_list)
-        sql += ')'
-        print(sql)
-        print(values)
-        self.cur.execute(sql,values)
-        self.conn.commit()
-        print(dto['gameId'],dto['participantIdentities'][0]['player']['summonerName'] ,dto['participants'][0]['participantId'], dto['participants'][0]['championId'])
+        print('teams :', teams)
+        print('participants :', participants)
+        print('participantIdentities : ',participantIdentities)
+
+        #matchDto 테이블에 데이터 넣기
+        gameVersion =dto['gameVersion']
+        print(gameVersion)
+        if gameVersion.startswith('10.') :
+            p_list = ['%s' for _ in range(len(values))]
+            sql = 'REPLACE INTO matchDto('
+            sql += ','.join(keys)
+            sql += ') VALUES('
+            sql += ','.join(p_list)
+            sql += ')'
+            print(sql)
+            print(values)
+            self.cur.execute(sql,values)
+
+            #teamstatsDto에 데이터 넣기
+            for team in teams :
+                team_keys = ['gameId']
+                team_keys.extend(team.keys())
+                team_values = [gameId]
+                team_values.extend(list(team.values()))
+                for i,v in enumerate(team_values) :
+                    team_values[i] = self.transformForDB(v)
+                p_list = ['%s' for _ in range(len(team_values))]
+                sql = 'REPLACE INTO teamStatsDto('
+                sql += ','.join(team_keys)
+                sql += ') VALUES('
+                sql += ','.join(p_list)
+                sql += ')'
+                self.cur.execute(sql, team_values)
+
+            #participantIdentities (playerDto)에 데이터 넣기
+            for participantIdentity in participantIdentities :
+                participantId = participantIdentity['participantId']
+                player = participantIdentity['player']
+                player_keys = player.keys()
+                player_values = list(player.values())
+                participantIdentity_keys = ['gameId','participantId']
+                participantIdentity_keys.extend(player_keys)
+                participantIdentity_values = [gameId,participantId]
+                participantIdentity_values.extend(player_values)
+                p_list = ['%s' for _ in range(len(participantIdentity_values))]
+                sql = 'REPLACE INTO playerDto('
+                sql += ','.join(participantIdentity_keys)
+                sql += ') VALUES('
+                sql += ','.join(p_list)
+                sql += ')'
+                self.cur.execute(sql, participantIdentity_values)
+
+            #participants (participantDto)에 데이터 넣기
+            for participant in participants :
+                stats = participant.pop('stats')
+                timeline = participant.pop('timeline')
+                participant_keys = ['gameId']
+                participant_keys.extend(participant.keys())
+                participant_values = [gameId]
+                participant_values.extend(list(participant.values()))
+                p_list = ['%s' for _ in range(len(participant_values))]
+                sql = 'REPLACE INTO participantDto('
+                sql += ','.join(participant_keys)
+                sql += ') VALUES('
+                sql += ','.join(p_list)
+                sql += ')'
+                self.cur.execute(sql, participant_values)
+
+                #participantStatsDto에 값 넣기
+                stats_keys= ['gameId']
+                stats_keys.extend(stats.keys())
+                stats_values = [gameId]
+                stats_values.extend(list(stats.values()))
+                p_list = ['%s' for _ in range(len(stats_values))]
+                sql = 'REPLACE INTO participantStatsDto('
+                sql += ','.join(stats_keys)
+                sql += ') VALUES('
+                sql += ','.join(p_list)
+                sql += ')'
+                self.cur.execute(sql, stats_values)
+
+                #participantTimelineDto에 값 넣기
+                timeline_keys = ['gameId']
+                timeline_keys.extend(timeline.keys())
+                timeline_values = [gameId]
+                timeline_values.extend(list(timeline.values()))
+                for i,v in enumerate(timeline_values) :
+                    timeline_values[i] = self.transformForDB(v)
+                p_list = ['%s' for _ in range(len(timeline_values))]
+                sql = 'REPLACE INTO participantTimelineDto('
+                sql += ','.join(timeline_keys)
+                sql += ') VALUES('
+                sql += ','.join(p_list)
+                sql += ')'
+                self.cur.execute(sql, timeline_values)
+
+            #변경된 내용 저장하기
+            self.conn.commit()
+        else :
+            print('구버전 ',gameVersion)
         self.closeDB()
 
+
+#메인함수
 if __name__ == '__main__':
     matchDto = MatchDto()
-    matchDto.createMatchDtoTable()
-    start_time = time.time()
+    matchDto.createTables()
+    # start_time = time.time()
     matchDto.insertMatchDtos()
-    end_time = time.time()
-    print('총 수행 시간 : %.2f초'%(end_time-start_time))
+    # end_time = time.time()
+    # print('총 수행 시간 : %.2f초'%(end_time-start_time))
 
 
 #match 기본 테이블, gameId를 얻는다
@@ -357,7 +447,6 @@ CREATE TABLE IF NOT EXISTS `team_easy`.`playerDto` (
   `summonerName` VARCHAR(50) NULL,
   `summonerId` VARCHAR(100) NULL,
   `platformId` VARCHAR(10) NULL,
-  INDEX `fk_playerDto_matchDto_idx` (`gameId` ASC) VISIBLE,
   PRIMARY KEY (`gameId`, `participantId`),
   CONSTRAINT `fk_playerDto_matchDto`
     FOREIGN KEY (`gameId`)
@@ -374,6 +463,7 @@ CREATE TABLE IF NOT EXISTS `team_easy`.`teamStatsDto` (
   `towerKills` INT NULL,
   `riftHeraldKills` INT NULL,
   `firstBlood` TINYINT NULL,
+  `inhibitorKills` INT NULL,
   `bans` VARCHAR(200) NULL,
   `firstBaron` TINYINT NULL,
   `firstDragon` TINYINT NULL,
@@ -385,7 +475,6 @@ CREATE TABLE IF NOT EXISTS `team_easy`.`teamStatsDto` (
   `vilemawKills` INT NULL,
   `firstRiftHerald` TINYINT NULL,
   `win` VARCHAR(10) NULL,
-  INDEX `fk_teamStatsDto_matchDto1_idx` (`gameId` ASC) VISIBLE,
   PRIMARY KEY (`gameId`, `teamId`),
   CONSTRAINT `fk_teamStatsDto_matchDto1`
     FOREIGN KEY (`gameId`)
@@ -406,7 +495,6 @@ CREATE TABLE IF NOT EXISTS `team_easy`.`participantDto` (
   `spell2Id` INT NULL,
   `highestAchievedSeasonTier` VARCHAR(20) NULL,
   `masteries` MEDIUMTEXT NULL,
-  INDEX `fk_participantDto_matchDto1_idx` (`gameId` ASC) VISIBLE,
   PRIMARY KEY (`gameId`, `participantId`),
   CONSTRAINT `fk_participantDto_matchDto1`
     FOREIGN KEY (`gameId`)
@@ -464,7 +552,6 @@ CREATE TABLE IF NOT EXISTS `team_easy`.`participantStatsDto` (
   `combatPlayerScore` INT NULL,
   `inhibitorKills` INT NULL,
   `turretKills` INT NULL,
-  `participantId` INT NULL,
   `trueDamageTaken` BIGINT NULL,
   `firstBloodAssist` TINYINT NULL,
   `nodeCaptureAssist` INT NULL,

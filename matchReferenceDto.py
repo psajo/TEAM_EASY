@@ -49,7 +49,8 @@ class MatchReferenceDto(mydao.MyDAO,collectData.CollectData) :
 
     #encryptedAccountId로 MatchReference List를 받아온다
     def getMatchReferenceDtoFromApi(self,encryptedAccountId,ak):
-        uri = f'https://kr.api.riotgames.com/lol/match/v4/matchlists/by-account/{encryptedAccountId}?queue=420&api_key={ak}'
+        #'https://kr.api.riotgames.com/lol/match/v4/matchlists/by-account/5lrH1NlrseTtrRsuVMX2Jwy0pNY1s2TkoqrXTFQLqt3N?queue=420&beginTime=1601510400000&api_key=RGAPI-48feb493-cd51-4ce0-96f5-5be724f52a8d'
+        uri = f'https://kr.api.riotgames.com/lol/match/v4/matchlists/by-account/{encryptedAccountId}?queue=420&beginTime=1601510400000&api_key={ak}'
         print(uri)
         response = requests.get(uri)
         status_code = response.status_code
@@ -77,8 +78,8 @@ class MatchReferenceDto(mydao.MyDAO,collectData.CollectData) :
                     for m in matches :
                         self.insertMatchReferenceDto(m)
                 elif status_code == 429 : #사용량 제한 걸림
-                    time.sleep(10)
                     print('sleep... 10 sec.')
+                    time.sleep(10)
                     continue
                 row_index+=1
             start_num += amount
