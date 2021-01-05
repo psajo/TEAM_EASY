@@ -70,6 +70,7 @@ class SummonerDto(mydao.MyDAO,collectData.CollectData) :
                 break
             max_row = len(rows)
             row_index =0
+            self.changeApikey()
             while row_index < max_row :
                 row =rows[row_index]
                 summonerName =row[2]
