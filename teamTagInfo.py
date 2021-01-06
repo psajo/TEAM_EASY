@@ -15,7 +15,7 @@ def closeConnCur() :
 
 #챔피언 태그 데이터를 읽는다(탱커,지속딜,...)
 def readChmpionTag() :
-    df =pd.read_excel('Champion_Tag_psj.xlsx', sheet_name='Sheet1')
+    df =pd.read_excel('tag_psj.xlsx', sheet_name='Sheet1')
     return df
 
 #한팀의 태그를 전체 합친다
@@ -68,5 +68,5 @@ if __name__=="__main__" :
     teamA = ['아트록스','그레이브즈','애니비아','진','쓰레쉬']
     teamB = ['티모','마스터 이','나서스','베인','소라카']
     getTeamAB(teamA,teamB)
-    rows = selectOneGame('4071423629')
+    # rows = selectOneGame('4071423629')
     # getDataset(rows)

@@ -2,6 +2,16 @@ import mydao
 import pandas as pd
 
 class DataSet(mydao.MyDAO) :
+    #챔피언아이디, 이름을 반환한다
+    def getChampions(self):
+        self.connectDB()
+        sql = 'SELECT `id`,`key`,`name`,`tags` FROM championDto'
+        self.cur.execute(sql)
+        rows = self.cur.fetchall()
+        self.closeDB()
+        df = pd.DataFrame(rows, columns=['id','key','name','tag'])
+        return df
+
     #챔피언아이디와 승패여부가 저장될 championDataSet 테이블을 만든다.
     def createChampionDataSetTable(self):
         self.connectDB()
@@ -66,7 +76,34 @@ class DataSet(mydao.MyDAO) :
 
     #각 팀의 챔피언 5명의 아이디를 받아 챔피언 태그로 변환한 데이터프레임을 반환한다
     def getChampTagDataSet(self):
-        pass
+        self.connectDB()
+        sql = "SELECT champion1, champion2,champion3, champion4, champion5, champion6, champion7,champion8, champion9, champion10,win FROM championDataSet"
+        self.cur.execute(sql)
+        rows = self.cur.fetchall()
+        df =self.loadTeamTag(rows)
+        self.closeDB()
+        return df
+
+    #teamTag수치를 반환
+    def loadTeamTag(self,rows):
+        df = pd.read_excel('tag_psj.xlsx', sheet_name='Sheet1')
+        df.set_index('챔피언', inplace=True)
+        print(df.head(5))
+        teamAB_tag = pd.DataFrame(columns=['탱커' ,'지속딜','폭딜' ,'포킹','보조','이동기(궁극제외, 대쉬)','CC','그랩','원거리','근거리' ,'AP' ,'AD' ,'탱커','지속딜','폭딜' ,'포킹' ,'보조','이동기(궁극제외, 대쉬)','CC' ,'그랩' ,'원거리' ,'근거리','AP', 'AD' ,'win'])
+        print(len(teamAB_tag.columns))
+        for row in rows :
+            teamA = df.loc[ [row[0],row[1],row[2],row[3],row[4]] , :]
+            teamB = df.loc[ [row[5],row[6],row[7],row[8],row[9]] , :]
+            teamA_tag =teamA.sum()
+            teamB_tag =teamB.sum()
+            temp =pd.concat([teamA_tag,teamB_tag])
+            temp['win'] = row[-1]
+            temp =pd.DataFrame(temp).transpose()
+            teamAB_tag = teamAB_tag.append(temp,ignore_index=True)
+        print(teamAB_tag.head(5))
+
+        return teamAB_tag
+
 
     #각 팀의 챔피언 5명의 세분화된 태그를 합쳐서 하나의 행으로 구성한 데이터셋 만들어 데이터프레임으로 반환한다
     def getDetailTagDataSet(self):
@@ -74,7 +111,7 @@ class DataSet(mydao.MyDAO) :
 
 if __name__ == '__main__':
     dataSet =DataSet()
-    dataSet.createChampionDataSetTable()
-    dataSet.makeChampionsDataSet()
-    # df = dataSet.getChampionsDataSet()
+    # dataSet.createChampionDataSetTable()
+    # dataSet.makeChampionsDataSet()
+    df = dataSet.getChampTagDataSet()
     # print(df.head(5))
