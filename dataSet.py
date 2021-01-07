@@ -104,14 +104,56 @@ class DataSet(mydao.MyDAO) :
 
         return teamAB_tag
 
+    #전체 챔피언들의 클래스를 분류한 데이터프레임을 반환
+    def getChampClassDataFrame(self):
+        self.connectDB()
+        sql = 'SELECT distinct `tags` FROM championDto'
+        self.cur.execute(sql)
+        rows_tag =self.cur.fetchall()
+        col =['championId']
+        for row in rows_tag:
+            col.append(row[0])
+        df=pd.DataFrame( columns=col)
+        sql = "SELECT `key`, `tags` FROM championDto"
+        self.cur.execute(sql)
+        rows = self.cur.fetchall()
+        for row in rows:
+            df =df.append({"championId":row[0], f'{row[1]}': 1}, ignore_index=True)
+        df = df.fillna(0)
+        df = df.astype('int')
+        self.closeDB()
+        return df
 
     #각 팀의 챔피언 5명의 세분화된 태그를 합쳐서 하나의 행으로 구성한 데이터셋 만들어 데이터프레임으로 반환한다
-    def getDetailTagDataSet(self):
-        pass
+    def getTeamChampClass(self):
+        df =self.getChampClassDataFrame()
+        df = df.set_index('championId')
+        col =[]
+        col.extend(list(df.columns))
+        col.extend(list(df.columns))
+        col.append('win')
+        ret_df = pd.DataFrame(columns=col)
+        self.connectDB()
+        sql = "SELECT champion1, champion2,champion3, champion4, champion5, champion6, champion7,champion8, champion9, champion10,win FROM championDataSet"
+        self.cur.execute(sql)
+        rows =self.cur.fetchall()
+        for row in rows :
+            champs =row[:-1]
+            win = row[-1]
+            teamA = df.loc[list(champs[:5]), :]
+            teamB = df.loc[list(champs[5:]), :]
+            teamA_class = teamA.sum()
+            teamB_class = teamB.sum()
+            teamAB_class = pd.concat([teamA_class,teamB_class])
+            teamAB_class['win']= win
+            temp = pd.DataFrame(teamAB_class).transpose()
+            ret_df = ret_df.append(temp,ignore_index=True)
+        self.closeDB()
+        return ret_df
+
 
 if __name__ == '__main__':
     dataSet =DataSet()
-    # dataSet.createChampionDataSetTable()
-    # dataSet.makeChampionsDataSet()
-    df = dataSet.getChampTagDataSet()
-    # print(df.head(5))
+    df = dataSet.getTeamChampClass()
+    pd.set_option('display.max_columns', 100)
+    print(df)
