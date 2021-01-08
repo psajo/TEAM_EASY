@@ -36,7 +36,7 @@ class MakeModels() :
         model = Sequential()
         model.add(Embedding(champ_size,10)) #챔피언 아이디가 최대 153, 100은 몇차원으로 벡터를 그릴건지이므로 변경가능
         model.add(Bidirectional(LSTM(200)))
-        model.add(Dense(1, activation='softmax'))
+        model.add(Dense(1, activation='sigmoid'))
         model.summary()
         #콜백함수 설정
         # es = EarlyStopping(monitor='val_loss', mode='min', verbose=1, patience=5) #5번 연속 정확도가 떨어진다면 학습 종료
@@ -45,7 +45,7 @@ class MakeModels() :
         #하이퍼 파라미터 설정 - 최적화, 손실함수,평가방법 설정(정확도)
         model.compile(optimizer='adam', loss='mean_squared_error', metrics=['acc'])
         #모델 학습
-        history = model.fit(X_train, y_train, epochs=200, callbacks=[ mc], batch_size=500, validation_split=0.2)
+        history = model.fit(X_train, y_train, epochs=10, callbacks=[ mc], batch_size=500, validation_split=0.2)
         #ValueError: logits and labels must have the same shape ((None, 2) vs (None, 1))
         loaded_model = load_model('models/championid_bilstm_model.h5')
         score = loaded_model.evaluate(X_test, y_test)[1] * 100
@@ -85,7 +85,7 @@ class MakeModels() :
         # 하이퍼 파라미터 설정 - 최적화, 손실함수,평가방법 설정(정확도)
         model.compile(optimizer='adam', loss='binary_crossentropy', metrics=['acc'])
         # 모델 학습
-        history = model.fit(X_train, y_train, epochs=200, callbacks=[ mc], batch_size=500, validation_split=0.2)
+        history = model.fit(X_train, y_train, epochs=10, callbacks=[ mc], batch_size=500, validation_split=0.2)
         # ValueError: logits and labels must have the same shape ((None, 2) vs (None, 1))
         loaded_model = load_model('models/tag_dnn_model.h5')
         score = loaded_model.evaluate(X_test, y_test)[1] * 100
@@ -125,7 +125,7 @@ class MakeModels() :
         # 하이퍼 파라미터 설정 - 최적화, 손실함수,평가방법 설정(정확도)
         model.compile(optimizer='adam', loss='binary_crossentropy', metrics=['acc'])
         # 모델 학습
-        history = model.fit(X_train, y_train, epochs=100, callbacks=[mc], batch_size=500, validation_split=0.2)
+        history = model.fit(X_train, y_train, epochs=10, callbacks=[mc], batch_size=500, validation_split=0.2)
         # ValueError: logits and labels must have the same shape ((None, 2) vs (None, 1))
         loaded_model = load_model('models/class_dnn_model.h5')
         score = loaded_model.evaluate(X_test, y_test)[1] * 100
@@ -148,11 +148,11 @@ if __name__ == '__main__':
     end_time = time.time()
     ct_time = end_time - start_time
     print('챔피언 태그 : ', ct_score,'점, ',ct_time,'초')
-    start_time = time.time()
-    ci_score = mm.championid_bilstm_model()
-    end_time = time.time()
-    ci_time = end_time - start_time
+    # start_time = time.time()
+    # ci_score = mm.championid_bilstm_model()
+    # end_time = time.time()
+    # ci_time = end_time - start_time
 
     print('챔피언 클래스 : ',cc_score,'점, ' ,cc_time,'초')
     print('챔피언 태그 : ', ct_score, '점, ', ct_time, '초')
-    print('챔피언 아이디 : ', ci_score, '점, ', ci_time, '초')
+    # print('챔피언 아이디 : ', ci_score, '점, ', ci_time, '초')

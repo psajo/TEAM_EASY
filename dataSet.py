@@ -63,10 +63,77 @@ class DataSet(mydao.MyDAO) :
                 print(e)
         self.closeDB()
 
+    #데이터셋 버전2
+    def createChampionDataSetTable2(self):
+        self.connectDB()
+        sql = '''CREATE TABLE IF NOT EXISTS `team_easy`.`championDataSet2` (
+                  `gameId` BIGINT NOT NULL,
+                  `champion1` INT NOT NULL,
+                  `champion2` INT NOT NULL,
+                  `champion3` INT NOT NULL,
+                  `champion4` INT NOT NULL,
+                  `champion5` INT NOT NULL,
+                  `champion6` INT NOT NULL,
+                  `champion7` INT NOT NULL,
+                  `champion8` INT NOT NULL,
+                  `champion9` INT NOT NULL,
+                  `champion10` INT NOT NULL,
+                  `win` TINYINT NOT NULL,
+                  PRIMARY KEY (`gameId`))
+                ENGINE = InnoDB'''
+        self.cur.execute(sql)
+        self.conn.commit()
+        print('create championDataSet table.')
+        self.closeDB()
+
+    # 학습할 데이터셋 만들기 버전2(챔피언을 라인별로 정렬)
+    def makeChampionsDataSet2(self):
+        self.connectDB()
+        sql = "SELECT gameId FROM matchdto WHERE gameVersion ='10.20.338.336'"
+        self.cur.execute(sql)
+        gameIds = self.cur.fetchall()
+        for gameId in gameIds:
+            sql = f"SELECT win FROM teamStatsDto WHERE gameId= '{gameId[0]}' AND teamId ='100'"
+            self.cur.execute(sql)
+            wins = self.cur.fetchall()
+            if wins[0][0] == 'Win':
+                win = 1
+            else:
+                win = 0
+            sql = f"SELECT p.gameId,p.participantId,championId,\
+                        (CASE p.participantId\
+                            WHEN 1  THEN '100'\
+                            WHEN 2  THEN '100'\
+                            WHEN 3  THEN '100'\
+                            WHEN 4  THEN '100'\
+                            WHEN 5  THEN '100'\
+                            WHEN 6  THEN '200'\
+                            WHEN 7  THEN '200'\
+                            WHEN 8  THEN '200'\
+                            WHEN 9  THEN '200'\
+                            WHEN 10  THEN '200'\
+                        END)AS teamId ,lane,role\
+                    FROM participanttimelinedto AS ptl  JOIN participantdto AS p ON ptl.gameId = p.gameId AND ptl.participantId = p.participantId\
+                    WHERE p.gameId ='{gameId[0]}'\
+                    ORDER BY p.gameId,teamId, FIELD(lane, 'TOP', 'JUNGLE','MIDDLE','BOTTOM'),role"
+            # sql = f"SELECT gameId, participantId, championId FROM participantdto WHERE gameId = '{gameId[0]}'"
+            self.cur.execute(sql)
+            rows = self.cur.fetchall()
+            sql = 'INSERT INTO championDataSet2(gameId, champion1, champion2,champion3, champion4, champion5, champion6, champion7,'
+            sql += 'champion8, champion9, champion10,win) '
+            sql += f'VALUES({rows[0][0]},{rows[0][2]},{rows[1][2]},{rows[2][2]},{rows[3][2]},{rows[4][2]},{rows[5][2]},{rows[6][2]},{rows[7][2]},{rows[8][2]},{rows[9][2]},{win})'
+            print(sql)
+            try:
+                self.cur.execute(sql)
+                self.conn.commit()
+            except Exception as e:
+                print(e)
+        self.closeDB()
+
     #championDataSet에서 데이터를 받아 데이터프레임으로 반환한다
     def getChampionsDataSet(self):
         self.connectDB()
-        sql ="SELECT champion1, champion2,champion3, champion4, champion5, champion6, champion7,champion8, champion9, champion10,win FROM championDataSet"
+        sql ="SELECT champion1, champion2,champion3, champion4, champion5, champion6, champion7,champion8, champion9, champion10,win FROM championDataSet2"
         self.cur.execute(sql)
         rows = self.cur.fetchall()
         self.closeDB()
@@ -77,7 +144,7 @@ class DataSet(mydao.MyDAO) :
     #각 팀의 챔피언 5명의 아이디를 받아 챔피언 태그로 변환한 데이터프레임을 반환한다
     def getChampTagDataSet(self):
         self.connectDB()
-        sql = "SELECT champion1, champion2,champion3, champion4, champion5, champion6, champion7,champion8, champion9, champion10,win FROM championDataSet"
+        sql = "SELECT champion1, champion2,champion3, champion4, champion5, champion6, champion7,champion8, champion9, champion10,win FROM championDataSet2"
         self.cur.execute(sql)
         rows = self.cur.fetchall()
         df =self.loadTeamTag(rows)
@@ -128,13 +195,15 @@ class DataSet(mydao.MyDAO) :
     def getTeamChampClass(self):
         df =self.getChampClassDataFrame()
         df = df.set_index('championId')
+        df.to_csv('champClass.csv')
         col =[]
         col.extend(list(df.columns))
         col.extend(list(df.columns))
         col.append('win')
         ret_df = pd.DataFrame(columns=col)
         self.connectDB()
-        sql = "SELECT champion1, champion2,champion3, champion4, champion5, champion6, champion7,champion8, champion9, champion10,win FROM championDataSet"
+        sql = "SELECT champion1, champion2,champion3, champion4, champion5, champion6, champion7,champion8, champion9, champion10,\
+              win FROM championDataSet2"
         self.cur.execute(sql)
         rows =self.cur.fetchall()
         for row in rows :
@@ -154,6 +223,6 @@ class DataSet(mydao.MyDAO) :
 
 if __name__ == '__main__':
     dataSet =DataSet()
-    df = dataSet.getTeamChampClass()
-    pd.set_option('display.max_columns', 100)
-    print(df)
+    # dataSet.createChampionDataSetTable2()
+    # dataSet.makeChampionsDataSet2()
+    dataSet.getTeamChampClass()
