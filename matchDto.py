@@ -298,16 +298,12 @@ class MatchDto(mydao.MyDAO,collectData.CollectData) :
     #하나의 matchReferenceDto를 insert한다
     def insertMatchDto(self,dto):
         self.connectDB()
-        print('type : ', type(dto), ' data : ', dto)
         gameId = dto['gameId']
         teams = dto.pop('teams')
         participants = dto.pop('participants')
         participantIdentities = dto.pop('participantIdentities')
         keys = list(dto.keys())
         values = list(dto.values())
-        print('teams :', teams)
-        print('participants :', participants)
-        print('participantIdentities : ',participantIdentities)
 
         #matchDto 테이블에 데이터 넣기
         gameVersion =dto['gameVersion']
